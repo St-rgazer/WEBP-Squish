@@ -92,7 +92,10 @@ public class Squish
     public static void DeleteTemp()
     {
         if (Directory.Exists(temp))
-            DeleteDirectory(temp);
+        { 
+            Console.WriteLine("Deleting temp"); 
+            DeleteDirectory(temp); 
+        }
     }
 
     public static void DeleteDirectory(string target_dir)
