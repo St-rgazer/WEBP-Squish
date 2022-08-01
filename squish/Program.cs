@@ -11,7 +11,7 @@ public class Squish
         Console.WriteLine($"Video: {args[0]}");
         CreateTemp();
         Console.WriteLine($"Output: {squishWebm()}");
-        Console.ReadKey();
+        DeleteTemp();
     }
 
     public static string squishWebm()
@@ -60,9 +60,10 @@ public class Squish
             string fileName = file.FileNumber + ".png";
             concatFile += $"file \'{Path.Combine(squished, fileName.Substring(0, fileName.Length - 4) + ".webm")}\'\n";
             newHeight -= squishTime;
-            pProcess.StartInfo.Arguments = $"-y -i \"{Path.Combine(frames, fileName)}\" -c:v vp8 -b:v 1M -crf 10 -vf scale={videoInfo.streams[0].width}x{newHeight} -aspect {videoInfo.streams[0].height}:{newHeight} -r {frameRate} -f webm \"{Path.Combine(squished, fileName.Substring(0, fileName.Length - 4) + ".webm")}\"";
+            pProcess.StartInfo.Arguments = $"-y -i \"{Path.Combine(frames, fileName)}\" -c:v vp8 -b:v 1M -crf 10 -vf scale={videoInfo.streams[0].width}x{newHeight} -aspect {videoInfo.streams[0].width}:{newHeight} -r {frameRate} -f webm \"{Path.Combine(squished, fileName.Substring(0, fileName.Length - 4) + ".webm")}\"";
             pProcess.Start();
-            pProcess.WaitForExit();
+            // pProcess.WaitForExit();
+            Thread.Sleep(100);
             Console.WriteLine($"{fileName} | New Height: {newHeight} | Scale: {videoInfo.streams[0].width}x{newHeight} | Aspect: {videoInfo.streams[0].height}:{newHeight} | Framerate: {frameRate}");
         }
         File.WriteAllText(concat, concatFile.TrimEnd('\r', '\n'));
@@ -86,6 +87,12 @@ public class Squish
             Directory.CreateDirectory(frames);
         if (!Directory.Exists(squished)) 
             Directory.CreateDirectory(squished);
+    }
+
+    public static void DeleteTemp()
+    {
+        if (Directory.Exists(temp))
+            DeleteDirectory(temp);
     }
 
     public static void DeleteDirectory(string target_dir)
