@@ -64,7 +64,7 @@ public class Squish
             pProcess.Start();
             // pProcess.WaitForExit();
             Thread.Sleep(100);
-            Console.WriteLine($"{fileName} | New Height: {newHeight} | Scale: {videoInfo.streams[0].width}x{newHeight} | Aspect: {videoInfo.streams[0].height}:{newHeight} | Framerate: {frameRate}");
+            Console.WriteLine($"{fileName} | New Height: {newHeight} | Scale: {videoInfo.streams[0].width}x{newHeight} | Aspect: {videoInfo.streams[0].width}:{newHeight} | Framerate: {frameRate}");
         }
         File.WriteAllText(concat, concatFile.TrimEnd('\r', '\n'));
         string audioText = hasAudio ? " and audio." : ".";
