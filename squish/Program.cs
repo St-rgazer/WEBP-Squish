@@ -50,7 +50,7 @@ public class Squish
         pProcess.WaitForExit();
         frameCount = Directory.GetFiles(frames, "*.png", SearchOption.TopDirectoryOnly).Length;
         Console.WriteLine($"Frames: {frameCount}");
-        squishTime = Math.Ceiling(videoInfo.streams[0].height / frameCount);
+        squishTime = (float)Math.Ceiling((float)videoInfo.streams[0].height / (float)frameCount);
         Console.WriteLine($"Video will be squished by -{squishTime}height/frame");
         var files = Directory.GetFiles(frames, "*")
          .Select(file => new { FileName = file, FileNumber = long.Parse(Path.GetFileNameWithoutExtension(file)) })
@@ -129,8 +129,8 @@ public class Squish
     public static System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
     public static bool hasAudio = true;
     public static int frameCount;
-    public static int squishTime;
-    public static int newHeight;
+    public static float squishTime;
+    public static float newHeight;
     public static int frameRate;
     public static string concatFile;
 
