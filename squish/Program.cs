@@ -33,24 +33,31 @@ public class Squish
         pProcess.StartInfo.RedirectStandardOutput = false;
         pProcess.StartInfo.CreateNoWindow = true;
         pProcess.StartInfo.FileName = "ffmpeg";
-        try
+        Console.WriteLine("Splitting audio into temporary file.");
+        pProcess.StartInfo.Arguments = $"-y -i \"{videoPath}\" -vn -c:a libvorbis \"{audio}\"";
+        pProcess.Start();
+        if (!File.Exists(audio))
         {
-            Console.WriteLine("Splitting audio into temporary file.");
-            pProcess.StartInfo.Arguments = $"-y -i \"{videoPath}\" -vn -c:a libvorbis \"{audio}\"";
-            pProcess.Start();
-        }
-        catch
-        {
-            Console.WriteLine("Video has no audio/");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Video has no audio.");
+            Console.ForegroundColor = ConsoleColor.White;
             hasAudio = false;
         }
+        hasAudio = false;       
         Console.WriteLine("Splitting frames");
         pProcess.StartInfo.Arguments = $"-y -i \"{videoPath}\" \"{frameName}\"";
         pProcess.Start();
         pProcess.WaitForExit();
         frameCount = Directory.GetFiles(frames, "*.png", SearchOption.TopDirectoryOnly).Length;
         Console.WriteLine($"Frames: {frameCount}");
-        squishTime = (float)Math.Ceiling((float)videoInfo.streams[0].height / (float)frameCount);
+        squishTime = videoInfo.streams[0].height / frameCount;
+        if (squishTime <= 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Video is too small to squish, defaulting -h/f to 1, height may be 0 before video ends.");
+            Console.ForegroundColor = ConsoleColor.White;
+            squishTime = 1;
+        }
         Console.WriteLine($"Video will be squished by -{squishTime}height/frame");
         var files = Directory.GetFiles(frames, "*")
          .Select(file => new { FileName = file, FileNumber = long.Parse(Path.GetFileNameWithoutExtension(file)) })
@@ -58,12 +65,18 @@ public class Squish
         foreach (var file in files)
         {
             string fileName = file.FileNumber + ".png";
+            
+            if (newHeight > 0)
+            {
+                newHeight -= squishTime;  
+            }
             concatFile += $"file \'{Path.Combine(squished, fileName.Substring(0, fileName.Length - 4) + ".webm")}\'\n";
-            newHeight -= squishTime;
             pProcess.StartInfo.Arguments = $"-y -i \"{Path.Combine(frames, fileName)}\" -c:v vp8 -b:v 1M -crf 10 -vf scale={videoInfo.streams[0].width}x{newHeight} -aspect {videoInfo.streams[0].width}:{newHeight} -r {frameRate} -f webm \"{Path.Combine(squished, fileName.Substring(0, fileName.Length - 4) + ".webm")}\"";
             pProcess.Start();
-            // pProcess.WaitForExit();
-            Thread.Sleep(100);
+            // Slower but will ensure each frame is done before moving on.
+            pProcess.WaitForExit();
+            // Faster but might fail if frames aren't done in time.
+            // Thread.Sleep(100);
             Console.WriteLine($"{fileName} | New Height: {newHeight} | Scale: {videoInfo.streams[0].width}x{newHeight} | Aspect: {videoInfo.streams[0].width}:{newHeight} | Framerate: {frameRate}");
         }
         File.WriteAllText(concat, concatFile.TrimEnd('\r', '\n'));
@@ -129,8 +142,8 @@ public class Squish
     public static System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
     public static bool hasAudio = true;
     public static int frameCount;
-    public static float squishTime;
-    public static float newHeight;
+    public static int squishTime;
+    public static int newHeight;
     public static int frameRate;
     public static string concatFile;
 
