@@ -36,6 +36,7 @@ public class Squish
         Console.WriteLine("Splitting audio into temporary file.");
         pProcess.StartInfo.Arguments = $"-y -i \"{videoPath}\" -vn -c:a libvorbis \"{audio}\"";
         pProcess.Start();
+        pProcess.WaitForExit();
         if (!File.Exists(audio))
         {
             Console.ForegroundColor = ConsoleColor.Red;
