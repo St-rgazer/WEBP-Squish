@@ -44,7 +44,6 @@ public class Squish
             Console.ForegroundColor = ConsoleColor.White;
             hasAudio = false;
         }
-        hasAudio = false;       
         Console.WriteLine("Splitting frames");
         pProcess.StartInfo.Arguments = $"-y -i \"{videoPath}\" \"{frameName}\"";
         pProcess.Start();
