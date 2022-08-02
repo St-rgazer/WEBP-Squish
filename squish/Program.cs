@@ -50,7 +50,7 @@ public class Squish
         pProcess.WaitForExit();
         frameCount = Directory.GetFiles(frames, "*.png", SearchOption.TopDirectoryOnly).Length;
         Console.WriteLine($"Frames: {frameCount}");
-        squishTime = videoInfo.streams[0].height / frameCount;
+        squishTime = Math.Ceiling(videoInfo.streams[0].height / frameCount);
         Console.WriteLine($"Video will be squished by -{squishTime}height/frame");
         var files = Directory.GetFiles(frames, "*")
          .Select(file => new { FileName = file, FileNumber = long.Parse(Path.GetFileNameWithoutExtension(file)) })
